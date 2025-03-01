@@ -4,9 +4,9 @@ import { body, validationResult } from "express-validator";
 // Validation rules
 const workoutValidationRules = [
   body("name").notEmpty().withMessage("Name is required"),
-  body("category").isIn(["strength", "cardio", "flexibility", "balance"]).withMessage("Invalid category"),
+  body("category").isIn(["Strength", "Cardio", "Flexibility", "Balance"]).withMessage("Invalid category"),
   body("duration").isInt({ min: 1 }).withMessage("Duration must be at least 1 minute"),
-  body("difficulty").isIn(["beginner", "intermediate", "advanced"]).withMessage("Invalid difficulty level"),
+  body("difficulty").isIn(["Beginner", "Intermediate", "Advanced"]).withMessage("Invalid difficulty level"),
 ];
 
 // Get all workouts (with pagination)
