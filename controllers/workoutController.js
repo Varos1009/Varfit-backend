@@ -19,24 +19,20 @@ export const getWorkouts = async (req, res) => {
 };
 
 // Get a single workout for a specific user
-export const getWorkout = async (req, res) => {
-    try {
-        const { userId } = req.query;  // ✅ Extract userId from query
-        const { id: workoutId } = req.params;  // ✅ Extract workoutId
+export const getWorkoutsByUser = async (req, res) => {
+  try {
+      const { userId } = req.params; // ✅ Get userId from URL params
 
-        if (!userId || !workoutId) {
-            return res.status(400).json({ message: "Workout ID and User ID are required" });
-        }
+      if (!userId) {
+          return res.status(400).json({ message: "User ID is required" });
+      }
 
-        const workout = await Workout.findOne({ _id: workoutId, userId }); // ✅ Ensure correct user
-        if (!workout) {
-            return res.status(404).json({ message: "Workout not found" });
-        }
-
-        res.json(workout);
-    } catch (error) {
-        res.status(500).json({ message: "Internal server error", error });
-    }
+      const workouts = await Workout.find({ userId }); // ✅ Fetch workouts only for this user
+      res.json(workouts);
+  } catch (error) {
+      console.error("Error fetching workouts:", error);
+      res.status(500).json({ message: "Internal server error", error });
+  }
 };
 
 
@@ -61,31 +57,38 @@ export const createWorkout = async (req, res) => {
   }
 };
 
-// Update a workout for a specific user
+// Update a workout
+const { validationResult } = require("express-validator");
+const Workout = require("../models/Workout"); // Assuming you're using Mongoose
+
+// Update Workout Function
 export const updateWorkout = async (req, res) => {
+  // Validate the request data
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
-    const { userId } = req.body;
-    const { id } = req.params;
+    // Find workout by ID and update with new data from the request body
+    const updatedWorkout = await Workout.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
-    const updatedWorkout = await Workout.findOneAndUpdate(
-      { _id: id, userId }, // Ensure workout belongs to the user
-      req.body,
-      { new: true }
-    );
-
+    // If no workout is found, return 404 error
     if (!updatedWorkout) {
       return res.status(404).json({ message: "Workout not found" });
     }
 
+    // Return the updated workout
     res.json(updatedWorkout);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update workout", error });
+    // Handle any other errors and return a 400 status with the error message
+    console.error("Error updating workout:", error);
+    res.status(400).json({ message: error.message });
   }
 };
+
+
+
 
 // Delete a workout
 export const deleteWorkout = async (req, res) => {
