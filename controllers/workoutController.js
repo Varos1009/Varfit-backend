@@ -57,9 +57,6 @@ export const createWorkout = async (req, res) => {
   }
 };
 
-// Update a workout
-const { validationResult } = require("express-validator");
-const Workout = require("../models/Workout"); // Assuming you're using Mongoose
 
 // Update Workout Function
 export const updateWorkout = async (req, res) => {
