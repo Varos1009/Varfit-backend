@@ -1,5 +1,6 @@
 import Plan from "../models/Plan.js";
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
 
 
 // Get all plans
@@ -9,34 +10,40 @@ export const getAllPlans = async (req, res) => {
     return res.status(400).json({ message: "User ID is required" });
   }
   try {
-    const plans = await Plan.find();
+    const plans = await Plan.find({ userId });
     res.json(plans);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get a single plan for a specific user for the current week
+
 export const getPlanById = async (req, res) => {
-  const { planId } = req.params; // ✅ Extract planId from params
+  const { planId } = req.params; // ✅ Use req.params instead of req.query
 
   if (!planId) {
+    console.log("❌ Plan ID is missing in the request.");
     return res.status(400).json({ message: "Plan ID is required" });
   }
 
-  console.log("Fetching plan by ID:", planId); // ✅ Debugging log
-
   try {
-    const plan = await Plan.findOne({ _id: planId }); // ✅ Query by planId
+    const plan = await Plan.findById(planId);
+    console.log("🔍 Plan retrieved:", plan);
+
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
     }
+
     res.json(plan);
   } catch (error) {
-    console.error("Error fetching plan:", error);
+    console.error("❌ Error fetching plan:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
+
 
 
 // Create a new plan for a user
