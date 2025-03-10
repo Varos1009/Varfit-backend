@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 
 const PlanSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
   title: { type: String, required: true },
-  level: { type: String, enum: ["beginner", "intermediate", "advanced"], required: true },
-  duration: { type: Number, required: true }, // in weeks
-  workouts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Workout" }], // Simple workout list
-  createdAt: { type: Date, default: Date.now },
-});
+  week: { type: Date, required: true }, // The week for which the plan is created
+  workouts: [
+    {
+      day: { type: String, required: true }, // e.g., 'Monday', 'Tuesday'
+      workoutId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workout', required: true }, // Workout associated with the day
+    },
+  ],
+}, { timestamps: true });
 
 const Plan = mongoose.model("Plan", PlanSchema);
 export default Plan;

@@ -1,12 +1,27 @@
 import express from "express";
-import { getPlans, getPlan, createPlan, updatePlan, deletePlan } from "../controllers/planController.js";
+import {
+  getAllPlans,
+  getPlanByUserForCurrentWeek,
+  createPlan,
+  updatePlan,
+  deletePlan,
+} from "../controllers/planController.js";
 
 const router = express.Router();
 
-router.get("/", getPlans);
-router.get("/:id", getPlan);
+// Fetch all plans
+router.get("/:userId", getAllPlans);
+
+// Fetch a plan for the current week for a specific user (requires ?userId=xxx)
+router.get("/user/:userId", getPlanByUserForCurrentWeek);
+
+// Create a new plan for a user
 router.post("/", createPlan);
-router.put("/:id", updatePlan);
-router.delete("/:id", deletePlan);
+
+// Update an existing plan
+router.put("/:planId", updatePlan);
+
+// Delete a plan by its ID
+router.delete("/:planId", deletePlan);
 
 export default router;

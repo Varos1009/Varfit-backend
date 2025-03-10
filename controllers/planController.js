@@ -1,88 +1,112 @@
 import Plan from "../models/Plan.js";
-import { body, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 
-// Validation rules for plan creation/updating
-const planValidationRules = [
-  body("title").notEmpty().withMessage("Title is required"),
-  body("level").isIn(["beginner", "intermediate", "advanced"]).withMessage("Level must be 'beginner', 'intermediate', or 'advanced'"),
-  body("duration").isNumeric().withMessage("Duration must be a number").bail(),
-  body("workouts").isArray().withMessage("Workouts should be an array of ObjectIds"),
-];
 
-// Get all plans with pagination
-export const getPlans = async (req, res) => {
+// Get all plans
+export const getAllPlans = async (req, res) => {
+  const { userId } = req.params; // Extract userId from query params
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const plans = await Plan.find()
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate("workouts");
-
-    const count = await Plan.countDocuments();
-    res.json({
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-      plans,
-    });
+    const plans = await Plan.find();
+    res.json(plans);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get a single plan
-export const getPlan = async (req, res) => {
+// Get a single plan for a specific user for the current week
+export const getPlanByUserForCurrentWeek = async (req, res) => {
+  const { userId } = req.params; // Extract userId from params
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  
+  console.log("Fetching plan for user:", userId); // Debugging log
+
   try {
-    const plan = await Plan.findById(req.params.id).populate("workouts");
-    if (!plan) return res.status(404).json({ message: "Plan not found" });
+    const plan = await Plan.findOne({ userId });
+    if (!plan) {
+      return res.status(404).json({ message: "Plan not found" });
+    }
     res.json(plan);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching plan:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Create a plan with validation
-export const createPlan = [
-  ...planValidationRules,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+// Create a new plan for a user
+export const createPlan = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { userId, title, workouts } = req.body; // userId, title, and workouts are in the request body
+
+    if (!userId || !title || !workouts || workouts.length !== 7) {
+      return res.status(400).json({ message: "Invalid input data, workouts for all 7 days are required." });
     }
 
-    try {
-      const newPlan = new Plan(req.body);
-      await newPlan.save();
-      res.status(201).json(newPlan);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  },
-];
+    const currentDate = new Date();
+    const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
 
-// Update a plan with validation
-export const updatePlan = [
-  ...planValidationRules,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+    const newPlan = new Plan({
+      userId,
+      title,
+      week: startOfWeek,
+      workouts,
+    });
+
+    await newPlan.save();
+    res.status(201).json(newPlan); // Return the newly created plan
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error creating plan." });
+  }
+};
+
+// Update a plan
+export const updatePlan = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const { userId, title, workouts } = req.body;
+    const { planId } = req.params;
+
+    if (!userId || !title || !workouts || workouts.length !== 7) {
+      return res.status(400).json({ message: "Invalid input data, workouts for all 7 days are required." });
     }
 
-    try {
-      const updatedPlan = await Plan.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate("workouts");
-      if (!updatedPlan) return res.status(404).json({ message: "Plan not found" });
-      res.json(updatedPlan);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    const updatedPlan = await Plan.findByIdAndUpdate(planId, { userId, title, workouts }, { new: true });
+
+    if (!updatedPlan) {
+      return res.status(404).json({ message: "Plan not found" });
     }
-  },
-];
+
+    res.json(updatedPlan); // Return the updated plan
+  } catch (error) {
+    console.error("Error updating plan:", error);
+    res.status(500).json({ message: "Internal server error", error });
+  }
+};
 
 // Delete a plan
 export const deletePlan = async (req, res) => {
   try {
-    const deletedPlan = await Plan.findByIdAndDelete(req.params.id);
-    if (!deletedPlan) return res.status(404).json({ message: "Plan not found" });
+    const { planId } = req.params;
+    const deletedPlan = await Plan.findByIdAndDelete(planId);
+
+    if (!deletedPlan) {
+      return res.status(404).json({ message: "Plan not found" });
+    }
+
     res.json({ message: "Plan deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
