@@ -17,16 +17,17 @@ export const getAllPlans = async (req, res) => {
 };
 
 // Get a single plan for a specific user for the current week
-export const getPlanByUserForCurrentWeek = async (req, res) => {
-  const { userId } = req.params; // Extract userId from params
-  if (!userId) {
-    return res.status(400).json({ message: "User ID is required" });
+export const getPlanById = async (req, res) => {
+  const { planId } = req.params; // ✅ Extract planId from params
+
+  if (!planId) {
+    return res.status(400).json({ message: "Plan ID is required" });
   }
-  
-  console.log("Fetching plan for user:", userId); // Debugging log
+
+  console.log("Fetching plan by ID:", planId); // ✅ Debugging log
 
   try {
-    const plan = await Plan.findOne({ userId });
+    const plan = await Plan.findOne({ _id: planId }); // ✅ Query by planId
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
     }
@@ -36,6 +37,7 @@ export const getPlanByUserForCurrentWeek = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Create a new plan for a user
 export const createPlan = async (req, res) => {

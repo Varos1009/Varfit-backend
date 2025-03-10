@@ -1,7 +1,7 @@
 import express from "express";
 import {
   getAllPlans,
-  getPlanByUserForCurrentWeek,
+  getPlanById,
   createPlan,
   updatePlan,
   deletePlan,
@@ -13,7 +13,7 @@ const router = express.Router();
 router.get("/:userId", getAllPlans);
 
 // Fetch a plan for the current week for a specific user (requires ?userId=xxx)
-router.get("/user/:userId", getPlanByUserForCurrentWeek);
+router.get("/user/:planId", getPlanById);
 
 // Create a new plan for a user
 router.post("/", createPlan);
