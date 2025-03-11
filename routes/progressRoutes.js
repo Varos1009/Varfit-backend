@@ -1,10 +1,9 @@
 import express from "express";
-import { getProgressLogs, logProgress, deleteProgressLog } from "../controllers/progressController.js";
+import { getUserProgress, updateProgress } from "../controllers/progressController.js";
 
 const router = express.Router();
 
-router.get("/", getProgressLogs);
-router.post("/", logProgress);
-router.delete("/:id", deleteProgressLog);
+router.get("/:userId", getUserProgress);
+router.post("/", updateProgress);
 
 export default router;

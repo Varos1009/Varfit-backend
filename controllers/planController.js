@@ -1,11 +1,10 @@
 import Plan from "../models/Plan.js";
 import { validationResult } from "express-validator";
-import mongoose from "mongoose";
 
 
-// Get all plans
+// ✅ Get all plans
 export const getAllPlans = async (req, res) => {
-  const { userId } = req.params; // Extract userId from query params
+  const { userId } = req.params;
   if (!userId) {
     return res.status(400).json({ message: "User ID is required" });
   }
@@ -17,15 +16,13 @@ export const getAllPlans = async (req, res) => {
   }
 };
 
-
+// ✅ Get a plan by ID
 export const getPlanById = async (req, res) => {
-  const { planId } = req.params; // ✅ Use req.params instead of req.query
+  const { planId } = req.params;
 
   if (!planId) {
-    console.log("❌ Plan ID is missing in the request.");
     return res.status(400).json({ message: "Plan ID is required" });
   }
-
   try {
     const plan = await Plan.findById(planId);
     console.log("🔍 Plan retrieved:", plan);
@@ -33,28 +30,20 @@ export const getPlanById = async (req, res) => {
     if (!plan) {
       return res.status(404).json({ message: "Plan not found" });
     }
-
     res.json(plan);
   } catch (error) {
-    console.error("❌ Error fetching plan:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-
-
-
-
-
-// Create a new plan for a user
+// Create a plan
 export const createPlan = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
   try {
-    const { userId, title, workouts } = req.body; // userId, title, and workouts are in the request body
+    const { userId, title, workouts } = req.body;
 
     if (!userId || !title || !workouts || workouts.length !== 7) {
       return res.status(400).json({ message: "Invalid input data, workouts for all 7 days are required." });
@@ -71,7 +60,7 @@ export const createPlan = async (req, res) => {
     });
 
     await newPlan.save();
-    res.status(201).json(newPlan); // Return the newly created plan
+    res.status(201).json(newPlan);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error creating plan." });
@@ -99,7 +88,7 @@ export const updatePlan = async (req, res) => {
       return res.status(404).json({ message: "Plan not found" });
     }
 
-    res.json(updatedPlan); // Return the updated plan
+    res.json(updatedPlan);
   } catch (error) {
     console.error("Error updating plan:", error);
     res.status(500).json({ message: "Internal server error", error });
