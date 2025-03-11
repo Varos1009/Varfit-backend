@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
 
 const ProgressSchema = new mongoose.Schema({
-  user: { type: String, required: true }, // Firebase UID
-  workout: { type: mongoose.Schema.Types.ObjectId, ref: "Workout" },
-  weight: { type: Number }, // in kg
-  reps: { type: Number },
-  date: { type: Date, default: Date.now },
-  duration: { type: Number }, // Exercise duration in seconds
-});
+  userId: { type: String, required: true },
+  date: { type: Date, required: true },
+  workouts: [
+    {
+      workoutsId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workout', required: true },
+      name: { type: String, required: true },
+      completed: { type: Boolean, required: true }
+    }
+  ]
+}, { timestamps: true });
 
 const Progress = mongoose.model("Progress", ProgressSchema);
 export default Progress;
