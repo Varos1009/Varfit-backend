@@ -17,28 +17,31 @@ export const getUserWeight = async (req, res) => {
     }
 };
 
-// ✅ Add or Update Weight Entry
-export const updateWeight = async (req, res) => {
+// ✅ Add Weight
+export const addWeight = async (req, res) => {
+  try {
     const { userId, date, weight } = req.body;
 
+    // Check if the required fields are present
     if (!userId || !date || !weight) {
-        return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    try {
-        const existingEntry = await Weight.findOne({ userId, date });
+    // Create a new Weight entry
+    const newWeight = new Weight({
+      userId,
+      date,
+      weight,
+    });
 
-        if (existingEntry) {
-            existingEntry.weight = weight;
-            await existingEntry.save();
-            return res.json(existingEntry);
-        } else {
-            const newEntry = new Weight({ userId, date, weight });
-            await newEntry.save();
-            return res.status(201).json(newEntry);
-        }
-    } catch (error) {
-        console.error("Error updating weight:", error);
-        res.status(500).json({ message: "Server error" });
-    }
+    // Save the new weight entry to the database
+    await newWeight.save();
+
+    // Return a success response
+    return res.status(201).json(newWeight);
+  } catch (error) {
+    console.error("Error adding weight:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
+
