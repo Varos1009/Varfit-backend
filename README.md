@@ -2,6 +2,12 @@
 
 This is the backend service for managing workout progress and weight tracking. The backend is built using Node.js and Express, with MongoDB as the database.
 
+## Live API
+
+The API is hosted and running on Render. You can access it here:
+
+- **API URL**: [https://varfit-backend.onrender.com/](https://varfit-backend.onrender.com/)
+
 
 ## Features
 
