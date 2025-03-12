@@ -5,7 +5,7 @@ const ProgressSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   workouts: [
     {
-      workoutsId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workout', required: true },
+      workoutId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workout', required: true },
       name: { type: String, required: true },
       completed: { type: Boolean, required: true }
     }

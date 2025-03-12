@@ -4,6 +4,6 @@ import { getUserProgress, updateProgress } from "../controllers/progressControll
 const router = express.Router();
 
 router.get("/:userId", getUserProgress);
-router.post("/", updateProgress);
+router.post("/:update", updateProgress);
 
 export default router;
